@@ -1,6 +1,19 @@
 package mangomilk.truetime;
 
+import com.electronwill.nightconfig.core.CommentedConfig;
+import com.electronwill.nightconfig.core.file.CommentedFileConfig;
+import com.electronwill.nightconfig.core.io.WritingMode;
+import com.electronwill.nightconfig.toml.TomlWriter;
+import net.minecraft.server.MinecraftServer;
+import net.neoforged.fml.config.IConfigSpec;
+import net.neoforged.fml.config.ModConfig;
+import net.neoforged.fml.config.ModConfigs;
 import net.neoforged.neoforge.common.ModConfigSpec;
+
+import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 public final class TrueTimeConfig
 {
@@ -81,5 +94,64 @@ public final class TrueTimeConfig
 
     private TrueTimeConfig()
     {
+    }
+
+    public static void reload(MinecraftServer server)
+    {
+        ModConfig config = ModConfigs.getModConfigs(TrueTime.MOD_ID).stream()
+                .filter(modConfig -> modConfig.getType() == ModConfig.Type.SERVER)
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException("TrueTime server config is not registered."));
+
+        Path path = config.getFullPath();
+        if (path == null)
+        {
+            path = server.getServerDirectory().resolve("serverconfig").resolve(config.getFileName());
+        }
+
+        try
+        {
+            Files.createDirectories(path.getParent());
+        }
+        catch (IOException exception)
+        {
+            throw new IllegalStateException("Could not create config directory for " + path + ".", exception);
+        }
+
+        try (CommentedFileConfig fileConfig = CommentedFileConfig.of(path))
+        {
+            fileConfig.load();
+
+            CommentedConfig loadedConfig = CommentedConfig.copy(fileConfig);
+            boolean corrected = !SPEC.isCorrect(loadedConfig);
+            if (corrected)
+            {
+                SPEC.correct(loadedConfig);
+            }
+
+            IConfigSpec.ILoadedConfig reloadedConfig = createLoadedConfig(loadedConfig, path, config);
+            SPEC.acceptConfig(reloadedConfig);
+            SPEC.afterReload();
+
+            if (corrected)
+            {
+                reloadedConfig.save();
+            }
+        }
+    }
+
+    private static IConfigSpec.ILoadedConfig createLoadedConfig(CommentedConfig config, Path path, ModConfig modConfig)
+    {
+        try
+        {
+            Class<?> loadedConfigClass = Class.forName("net.neoforged.fml.config.LoadedConfig");
+            Constructor<?> constructor = loadedConfigClass.getDeclaredConstructor(CommentedConfig.class, Path.class, ModConfig.class);
+            constructor.setAccessible(true);
+            return (IConfigSpec.ILoadedConfig) constructor.newInstance(config, path, modConfig);
+        }
+        catch (ReflectiveOperationException exception)
+        {
+            throw new IllegalStateException("Could not create NeoForge loaded config wrapper.", exception);
+        }
     }
 }

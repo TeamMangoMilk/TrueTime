@@ -106,12 +106,13 @@ public final class TrueTimeCommands
 
     private static int reload(CommandContext<CommandSourceStack> context)
     {
+        TrueTimeConfig.reload(context.getSource().getServer());
         ServerLevel overworld = context.getSource().getServer().overworld();
         TrueTimeSavedData data = TrueTimeSavedData.get(overworld);
         TrueTimeTimekeeper.updateCurrentPreservedDay(data.getPreservedDay());
         TrueTimePlaceholderExport.export(context.getSource().getServer(), data.getPreservedDay());
         TrueTimeTabIntegration.tryRegister();
-        context.getSource().sendSuccess(() -> Component.literal("TrueTime reloaded. TAB placeholder registered: " + TrueTimeTabIntegration.isRegistered() + "."), true);
+        context.getSource().sendSuccess(() -> Component.literal("TrueTime config reloaded. TAB placeholder registered: " + TrueTimeTabIntegration.isRegistered() + "."), true);
         return TrueTimeTabIntegration.isRegistered() ? 1 : 0;
     }
 

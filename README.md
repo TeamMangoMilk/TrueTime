@@ -41,7 +41,7 @@ TrueTime provides operator commands for manually controlling the preserved day c
 - `/truetime adddays <days>` moves the preserved day counter forward by a specific number of days.
 - `/truetime settime <day> <timeOfDay>` sets both the preserved day counter and the time of day in one command.
 - `/truetime sync` recalculates the preserved day counter from the current Overworld time, useful after world migration or configuration changes.
-- `/truetime reload` refreshes TrueTime integrations, rewrites the placeholder export, and retries TAB placeholder registration.
+- `/truetime reload` reloads the TrueTime server config, refreshes integrations, rewrites the placeholder export, and retries TAB placeholder registration.
 
 Commands that would move the Overworld clock backwards require `allowBackwardTimeForOps` to be enabled.
 

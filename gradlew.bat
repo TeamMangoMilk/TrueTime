@@ -40,6 +40,7 @@ goto fail
 :execute
 @rem Execute Gradle
 "%JAVA_EXE%" -Dorg.gradle.appname=%APP_BASE_NAME% -classpath "%APP_HOME%gradle\wrapper\gradle-wrapper.jar" org.gradle.wrapper.GradleWrapperMain %*
+exit /b %ERRORLEVEL%
 
 :fail
 exit /b 1

@@ -41,6 +41,8 @@ TrueTime provides operator commands for manually controlling the preserved day c
 - `/truetime settime <day> <timeOfDay>` sets both the preserved day counter and the time of day in one command.
 - `/truetime sync` recalculates the preserved day counter from the current Overworld time, useful after world migration or configuration changes.
 
+Commands that would move the Overworld clock backwards require `allowBackwardTimeForOps` to be enabled.
+
 ## Configuration
 
 TrueTime includes server configuration options for controlling how strict and visible time correction should be:
@@ -51,6 +53,8 @@ TrueTime includes server configuration options for controlling how strict and vi
 ## Persistence
 
 TrueTime stores its preserved day counter in world saved data, not a global config file. This keeps the tracked day value tied to the world itself so it survives server restarts, backups, transfers, and modpack updates.
+
+When TrueTime is added to an existing server, it initialises from the current Overworld time on the first server tick. This means existing worlds keep their current day counter instead of starting again from day 0.
 
 Only the Overworld day counter is tracked. Nether, End, and custom dimension time values are not corrected unless they are explicitly tied to Overworld time by another system.
 

@@ -114,6 +114,8 @@ public final class TrueTimeCommands
 
         overworld.setDayTime(targetDayTime);
         TrueTimeSavedData.get(overworld).setFromDayTime(targetDayTime);
+        TrueTimeTimekeeper.updateCurrentPreservedDay(TrueTimeTimekeeper.dayOf(targetDayTime));
+        TrueTimePlaceholderExport.export(source.getServer(), TrueTimeTimekeeper.dayOf(targetDayTime));
         source.getServer().forceTimeSynchronization();
     }
 

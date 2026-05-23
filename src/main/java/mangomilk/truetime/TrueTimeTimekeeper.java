@@ -15,6 +15,7 @@ public final class TrueTimeTimekeeper
     private static long correctionsThisSession;
     private static long lastCorrectionFrom = -1L;
     private static long lastCorrectionTo = -1L;
+    private static long currentPreservedDay;
 
     private TrueTimeTimekeeper()
     {
@@ -30,19 +31,25 @@ public final class TrueTimeTimekeeper
         TrueTimeSavedData data = TrueTimeSavedData.get(level);
         long currentDayTime = Math.max(0L, level.getDayTime());
 
+        TrueTimeTabIntegration.tryRegister();
+
         if (!data.isInitialised())
         {
             data.setFromDayTime(currentDayTime);
+            updateCurrentPreservedDay(data.getPreservedDay());
+            TrueTimePlaceholderExport.export(level.getServer(), data.getPreservedDay());
             return;
         }
 
         long previousDayTime = data.getLastKnownDayTime();
+        long previousPreservedDay = data.getPreservedDay();
 
         if (currentDayTime < previousDayTime)
         {
             long correctedDayTime = nextForwardOccurrence(previousDayTime, timeOfDay(currentDayTime));
             level.setDayTime(correctedDayTime);
             data.setFromDayTime(correctedDayTime);
+            updateCurrentPreservedDay(data.getPreservedDay());
 
             correctionsThisSession++;
             lastCorrectionFrom = currentDayTime;
@@ -57,12 +64,19 @@ public final class TrueTimeTimekeeper
                 );
             }
 
+            TrueTimePlaceholderExport.exportIfChanged(level.getServer(), data.getPreservedDay());
             return;
         }
 
         if (currentDayTime != previousDayTime || data.getPreservedDay() != dayOf(currentDayTime))
         {
             data.setFromDayTime(currentDayTime);
+            updateCurrentPreservedDay(data.getPreservedDay());
+
+            if (data.getPreservedDay() != previousPreservedDay)
+            {
+                TrueTimePlaceholderExport.export(level.getServer(), data.getPreservedDay());
+            }
         }
     }
 
@@ -102,5 +116,15 @@ public final class TrueTimeTimekeeper
     public static long getLastCorrectionTo()
     {
         return lastCorrectionTo;
+    }
+
+    public static long getCurrentPreservedDay()
+    {
+        return currentPreservedDay;
+    }
+
+    public static void updateCurrentPreservedDay(long preservedDay)
+    {
+        currentPreservedDay = Math.max(0L, preservedDay);
     }
 }

@@ -19,6 +19,7 @@ public class TrueTime
         modContainer.registerConfig(ModConfig.Type.SERVER, TrueTimeConfig.SPEC);
         NeoForge.EVENT_BUS.addListener(TrueTimeCommands::register);
         NeoForge.EVENT_BUS.addListener(TrueTimeTimekeeper::onLevelTick);
+        NeoForge.EVENT_BUS.addListener(TrueTimeTabIntegration::onServerStarted);
 
         LOGGER.info("TrueTime initialised.");
     }

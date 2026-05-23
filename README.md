@@ -49,6 +49,8 @@ TrueTime includes server configuration options for controlling how strict and vi
 
 - `allowBackwardTimeForOps`: Allows operators to intentionally move time backwards through dedicated TrueTime commands. Regular vanilla-style time changes remain protected by default.
 - `logCorrections`: Logs whenever TrueTime converts a backward time change into the next valid future time. This is useful for diagnosing command blocks, datapacks, or other mods that modify time.
+- `exportPlaceholderFile`: Writes the preserved day counter to a plain text file for PlaceholderAPI/TAB bridges.
+- `placeholderFilePath`: Controls where the placeholder export is written. The default is `truetime/day.txt` in the server root.
 
 ## Persistence
 
@@ -57,6 +59,32 @@ TrueTime stores its preserved day counter in world saved data, not a global conf
 When TrueTime is added to an existing server, it initialises from the current Overworld time on the first server tick. This means existing worlds keep their current day counter instead of starting again from day 0.
 
 Only the Overworld day counter is tracked. Nether, End, and custom dimension time values are not corrected unless they are explicitly tied to Overworld time by another system.
+
+## Placeholder Export
+
+When the NEZNAMY/TAB mod is installed, TrueTime registers a TAB server placeholder directly:
+
+```text
+%truetime_day%
+```
+
+This placeholder can be used in TAB config files on NeoForge servers without Bukkit, Paper, or PlaceholderAPI.
+
+TrueTime can also export the preserved Overworld day counter to a plain text file for external tools or custom bridge setups.
+
+By default, the file is written to:
+
+```text
+truetime/day.txt
+```
+
+The file contains only the current preserved day number, for example:
+
+```text
+42
+```
+
+The file is written when TrueTime first initialises, when the preserved day changes, and when an operator command updates the counter. This gives plugin-side placeholder tools a simple value to read without requiring direct NeoForge-to-Bukkit API integration.
 
 ## Requirements
 

@@ -1,0 +1,15 @@
+.gradle/
+build/
+out/
+run/
+runs/
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+.DS_Store
+Thumbs.db
+*.log
+hs_err_pid*
+replay_pid*

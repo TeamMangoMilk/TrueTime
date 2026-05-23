@@ -16,6 +16,7 @@ public final class TrueTimeTimekeeper
     private static long lastCorrectionFrom = -1L;
     private static long lastCorrectionTo = -1L;
     private static long currentPreservedDay;
+    private static boolean startupValidationLogged;
 
     private TrueTimeTimekeeper()
     {
@@ -38,7 +39,15 @@ public final class TrueTimeTimekeeper
             data.setFromDayTime(currentDayTime);
             updateCurrentPreservedDay(data.getPreservedDay());
             TrueTimePlaceholderExport.export(level.getServer(), data.getPreservedDay());
+            logStartupValidation(level, data);
             return;
+        }
+
+        if (!startupValidationLogged)
+        {
+            updateCurrentPreservedDay(data.getPreservedDay());
+            TrueTimePlaceholderExport.exportIfChanged(level.getServer(), data.getPreservedDay());
+            logStartupValidation(level, data);
         }
 
         long previousDayTime = data.getLastKnownDayTime();
@@ -76,6 +85,7 @@ public final class TrueTimeTimekeeper
             if (data.getPreservedDay() != previousPreservedDay)
             {
                 TrueTimePlaceholderExport.export(level.getServer(), data.getPreservedDay());
+                TrueTimeAnnouncements.announceDayChange(level.getServer(), data.getPreservedDay(), currentDayTime);
             }
         }
     }
@@ -126,5 +136,18 @@ public final class TrueTimeTimekeeper
     public static void updateCurrentPreservedDay(long preservedDay)
     {
         currentPreservedDay = Math.max(0L, preservedDay);
+    }
+
+    private static void logStartupValidation(ServerLevel level, TrueTimeSavedData data)
+    {
+        LOGGER.info(
+                "TrueTime tracking Overworld day {} at raw time {}. TAB placeholder registered: {}. Placeholder export enabled: {}.",
+                data.getPreservedDay(),
+                level.getDayTime(),
+                TrueTimeTabIntegration.isRegistered(),
+                TrueTimeConfig.EXPORT_PLACEHOLDER_FILE.get()
+        );
+
+        startupValidationLogged = true;
     }
 }

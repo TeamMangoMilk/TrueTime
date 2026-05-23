@@ -42,7 +42,8 @@ public final class TrueTimeCommands
                 .then(Commands.literal("settime")
                 .then(Commands.argument("day", LongArgumentType.longArg(0L)) 
                 .then(Commands.argument("timeOfDay", StringArgumentType.word()).executes(TrueTimeCommands::setTime))))
-                .then(Commands.literal("sync").executes(TrueTimeCommands::sync)));
+                .then(Commands.literal("sync").executes(TrueTimeCommands::sync))
+                .then(Commands.literal("reload").executes(TrueTimeCommands::reload)));
     }
 
     private static int info(CommandContext<CommandSourceStack> context)
@@ -101,6 +102,17 @@ public final class TrueTimeCommands
         data.setFromDayTime(overworld.getDayTime());
         context.getSource().sendSuccess(() -> Component.literal("TrueTime synchronised to Overworld day " + data.getPreservedDay() + "."), true);
         return (int) Math.min(Integer.MAX_VALUE, data.getPreservedDay());
+    }
+
+    private static int reload(CommandContext<CommandSourceStack> context)
+    {
+        ServerLevel overworld = context.getSource().getServer().overworld();
+        TrueTimeSavedData data = TrueTimeSavedData.get(overworld);
+        TrueTimeTimekeeper.updateCurrentPreservedDay(data.getPreservedDay());
+        TrueTimePlaceholderExport.export(context.getSource().getServer(), data.getPreservedDay());
+        TrueTimeTabIntegration.tryRegister();
+        context.getSource().sendSuccess(() -> Component.literal("TrueTime reloaded. TAB placeholder registered: " + TrueTimeTabIntegration.isRegistered() + "."), true);
+        return TrueTimeTabIntegration.isRegistered() ? 1 : 0;
     }
 
     private static void applyOperatorTimeChange(CommandSourceStack source, ServerLevel overworld, long targetDayTime)

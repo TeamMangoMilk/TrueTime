@@ -10,6 +10,15 @@ public final class TrueTimeConfig
     public static final ModConfigSpec.BooleanValue LOG_CORRECTIONS;
     public static final ModConfigSpec.BooleanValue EXPORT_PLACEHOLDER_FILE;
     public static final ModConfigSpec.ConfigValue<String> PLACEHOLDER_FILE_PATH;
+    public static final ModConfigSpec.BooleanValue ANNOUNCE_DAY_CHANGES;
+    public static final ModConfigSpec.ConfigValue<String> ANNOUNCEMENT_MODE;
+    public static final ModConfigSpec.ConfigValue<String> DAY_CHANGE_MESSAGE;
+    public static final ModConfigSpec.ConfigValue<String> DAY_CHANGE_TITLE;
+    public static final ModConfigSpec.ConfigValue<String> DAY_CHANGE_SUBTITLE;
+    public static final ModConfigSpec.ConfigValue<String> DAY_CHANGE_ACTION_BAR;
+    public static final ModConfigSpec.IntValue TITLE_FADE_IN_TICKS;
+    public static final ModConfigSpec.IntValue TITLE_STAY_TICKS;
+    public static final ModConfigSpec.IntValue TITLE_FADE_OUT_TICKS;
 
     static
     {
@@ -30,6 +39,42 @@ public final class TrueTimeConfig
         PLACEHOLDER_FILE_PATH = builder
                 .comment("Path to the placeholder export file, relative to the server root unless absolute.")
                 .define("placeholderFilePath", "truetime/day.txt");
+
+        ANNOUNCE_DAY_CHANGES = builder
+                .comment("Announce preserved Overworld day changes to players.")
+                .define("announceDayChanges", false);
+
+        ANNOUNCEMENT_MODE = builder
+                .comment("Where day-change announcements appear. Valid values: chat, actionbar, title, chat_actionbar, chat_title, all.")
+                .define("announcementMode", "chat");
+
+        DAY_CHANGE_MESSAGE = builder
+                .comment("Chat message used for day-change broadcasts. Available tokens: {day}, {time}, {raw_time}.")
+                .define("dayChangeMessage", "TrueTime: Day {day} has begun.");
+
+        DAY_CHANGE_TITLE = builder
+                .comment("Title text shown when announcementMode includes title. Available tokens: {day}, {time}, {raw_time}.")
+                .define("dayChangeTitle", "Day {day}");
+
+        DAY_CHANGE_SUBTITLE = builder
+                .comment("Subtitle text shown when announcementMode includes title. Leave empty to hide it.")
+                .define("dayChangeSubtitle", "A new day has begun.");
+
+        DAY_CHANGE_ACTION_BAR = builder
+                .comment("Action bar text shown when announcementMode includes actionbar. Available tokens: {day}, {time}, {raw_time}.")
+                .define("dayChangeActionBar", "Day {day}");
+
+        TITLE_FADE_IN_TICKS = builder
+                .comment("Title fade-in duration in ticks.")
+                .defineInRange("titleFadeInTicks", 10, 0, 200);
+
+        TITLE_STAY_TICKS = builder
+                .comment("Title stay duration in ticks.")
+                .defineInRange("titleStayTicks", 60, 1, 400);
+
+        TITLE_FADE_OUT_TICKS = builder
+                .comment("Title fade-out duration in ticks.")
+                .defineInRange("titleFadeOutTicks", 20, 0, 200);
 
         SPEC = builder.build();
     }

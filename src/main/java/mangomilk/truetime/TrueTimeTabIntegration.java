@@ -34,6 +34,11 @@ public final class TrueTimeTabIntegration
         register();
     }
 
+    public static boolean isRegistered()
+    {
+        return registered;
+    }
+
     private static void register()
     {
         try

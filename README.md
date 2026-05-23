@@ -32,6 +32,7 @@ TrueTime provides operator commands for manually controlling the preserved day c
 /truetime adddays <days>
 /truetime settime <day> <timeOfDay>
 /truetime sync
+/truetime reload
 ```
 
 - `/truetime info` shows the preserved day counter, raw Overworld game time, current time of day, and recent correction status.
@@ -40,6 +41,7 @@ TrueTime provides operator commands for manually controlling the preserved day c
 - `/truetime adddays <days>` moves the preserved day counter forward by a specific number of days.
 - `/truetime settime <day> <timeOfDay>` sets both the preserved day counter and the time of day in one command.
 - `/truetime sync` recalculates the preserved day counter from the current Overworld time, useful after world migration or configuration changes.
+- `/truetime reload` refreshes TrueTime integrations, rewrites the placeholder export, and retries TAB placeholder registration.
 
 Commands that would move the Overworld clock backwards require `allowBackwardTimeForOps` to be enabled.
 
@@ -51,6 +53,13 @@ TrueTime includes server configuration options for controlling how strict and vi
 - `logCorrections`: Logs whenever TrueTime converts a backward time change into the next valid future time. This is useful for diagnosing command blocks, datapacks, or other mods that modify time.
 - `exportPlaceholderFile`: Writes the preserved day counter to a plain text file for PlaceholderAPI/TAB bridges.
 - `placeholderFilePath`: Controls where the placeholder export is written. The default is `truetime/day.txt` in the server root.
+- `announceDayChanges`: Announces preserved Overworld day changes to players. Disabled by default.
+- `announcementMode`: Controls where announcements appear. Valid values: `chat`, `actionbar`, `title`, `chat_actionbar`, `chat_title`, and `all`.
+- `dayChangeMessage`: Custom chat message used for day-change announcements. Supports `{day}`, `{time}`, and `{raw_time}`.
+- `dayChangeTitle`: Custom title text used when `announcementMode` includes `title`.
+- `dayChangeSubtitle`: Custom subtitle text used when `announcementMode` includes `title`. Leave empty to hide it.
+- `dayChangeActionBar`: Custom action bar text used when `announcementMode` includes `actionbar`.
+- `titleFadeInTicks`, `titleStayTicks`, `titleFadeOutTicks`: Title timing controls in ticks.
 
 ## Persistence
 

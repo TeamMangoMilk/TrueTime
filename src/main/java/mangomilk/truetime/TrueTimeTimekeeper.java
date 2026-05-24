@@ -74,6 +74,10 @@ public final class TrueTimeTimekeeper
             }
 
             TrueTimePlaceholderExport.exportIfChanged(level.getServer(), data.getPreservedDay());
+            if (data.getPreservedDay() != previousPreservedDay)
+            {
+                TrueTimeAnnouncements.announceDayChange(level.getServer(), data.getPreservedDay(), correctedDayTime);
+            }
             return;
         }
 

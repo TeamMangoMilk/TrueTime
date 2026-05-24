@@ -11,6 +11,7 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 
 public final class TrueTimeCommands
@@ -32,6 +33,24 @@ public final class TrueTimeCommands
     private static void register(CommandDispatcher<CommandSourceStack> dispatcher)
     {
         dispatcher.register(Commands.literal("truetime")
+                .then(Commands.literal("announcements")
+                .then(Commands.literal("status").executes(context -> setAnnouncementSuppression(context, null)))
+                .then(Commands.literal("hide").executes(context -> setAnnouncementSuppression(context, true)))
+                .then(Commands.literal("show").executes(context -> setAnnouncementSuppression(context, false)))
+                .then(Commands.literal("enable").requires(source -> source.hasPermission(Commands.LEVEL_GAMEMASTERS)).executes(context -> setAnnouncementsEnabled(context, true)))
+                .then(Commands.literal("disable").requires(source -> source.hasPermission(Commands.LEVEL_GAMEMASTERS)).executes(context -> setAnnouncementsEnabled(context, false))))
+                .then(Commands.literal("info").requires(source -> source.hasPermission(Commands.LEVEL_GAMEMASTERS)).executes(TrueTimeCommands::info))
+                .then(Commands.literal("resetday").requires(source -> source.hasPermission(Commands.LEVEL_GAMEMASTERS)).executes(context -> setDay(context, 0L)))
+                .then(Commands.literal("setday").requires(source -> source.hasPermission(Commands.LEVEL_GAMEMASTERS))
+                .then(Commands.argument("day", LongArgumentType.longArg(0L)).executes(context -> setDay(context, LongArgumentType.getLong(context, "day")))))
+                .then(Commands.literal("adddays").requires(source -> source.hasPermission(Commands.LEVEL_GAMEMASTERS))
+                .then(Commands.argument("days", LongArgumentType.longArg(0L)).executes(context -> addDays(context, LongArgumentType.getLong(context, "days")))))
+                .then(Commands.literal("settime").requires(source -> source.hasPermission(Commands.LEVEL_GAMEMASTERS))
+                .then(Commands.argument("day", LongArgumentType.longArg(0L)) 
+                .then(Commands.argument("timeOfDay", StringArgumentType.word()).executes(TrueTimeCommands::setTime))))
+                .then(Commands.literal("sync").requires(source -> source.hasPermission(Commands.LEVEL_GAMEMASTERS)).executes(TrueTimeCommands::sync))
+                .then(Commands.literal("reload").requires(source -> source.hasPermission(Commands.LEVEL_GAMEMASTERS)).executes(TrueTimeCommands::reload))
+                .then(Commands.literal("admin")
                 .requires(source -> source.hasPermission(Commands.LEVEL_GAMEMASTERS))
                 .then(Commands.literal("info").executes(TrueTimeCommands::info))
                 .then(Commands.literal("resetday").executes(context -> setDay(context, 0L)))
@@ -43,7 +62,7 @@ public final class TrueTimeCommands
                 .then(Commands.argument("day", LongArgumentType.longArg(0L)) 
                 .then(Commands.argument("timeOfDay", StringArgumentType.word()).executes(TrueTimeCommands::setTime))))
                 .then(Commands.literal("sync").executes(TrueTimeCommands::sync))
-                .then(Commands.literal("reload").executes(TrueTimeCommands::reload)));
+                .then(Commands.literal("reload").executes(TrueTimeCommands::reload))));
     }
 
     private static int info(CommandContext<CommandSourceStack> context)
@@ -114,6 +133,30 @@ public final class TrueTimeCommands
         TrueTimeTabIntegration.tryRegister();
         context.getSource().sendSuccess(() -> Component.literal("TrueTime config reloaded. TAB placeholder registered: " + TrueTimeTabIntegration.isRegistered() + "."), true);
         return TrueTimeTabIntegration.isRegistered() ? 1 : 0;
+    }
+
+    private static int setAnnouncementSuppression(CommandContext<CommandSourceStack> context, Boolean suppressed) throws CommandSyntaxException
+    {
+        ServerPlayer player = context.getSource().getPlayerOrException();
+        TrueTimeSavedData data = TrueTimeSavedData.get(context.getSource().getServer().overworld());
+
+        if (suppressed != null)
+        {
+            data.setVisualAnnouncementsSuppressed(player.getUUID(), suppressed);
+        }
+
+        boolean currentValue = data.hasSuppressedVisualAnnouncements(player.getUUID());
+        String status = currentValue ? "hidden" : "shown";
+        context.getSource().sendSuccess(() -> Component.literal("TrueTime visual day announcements are now " + status + "."), false);
+        return currentValue ? 0 : 1;
+    }
+
+    private static int setAnnouncementsEnabled(CommandContext<CommandSourceStack> context, boolean enabled)
+    {
+        TrueTimeConfig.setAnnouncementsEnabled(context.getSource().getServer(), enabled);
+        String status = enabled ? "enabled" : "disabled";
+        context.getSource().sendSuccess(() -> Component.literal("TrueTime day-change announcements are now " + status + "."), true);
+        return enabled ? 1 : 0;
     }
 
     private static void applyOperatorTimeChange(CommandSourceStack source, ServerLevel overworld, long targetDayTime)

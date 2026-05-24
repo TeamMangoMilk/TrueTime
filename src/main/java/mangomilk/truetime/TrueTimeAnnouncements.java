@@ -53,9 +53,15 @@ public final class TrueTimeAnnouncements
     private static void broadcastActionBar(MinecraftServer server, String message)
     {
         Component component = Component.literal(message);
+        TrueTimeSavedData data = TrueTimeSavedData.get(server.overworld());
 
         for (ServerPlayer player : server.getPlayerList().getPlayers())
         {
+            if (data.hasSuppressedVisualAnnouncements(player.getUUID()))
+            {
+                continue;
+            }
+
             player.connection.send(new ClientboundSetActionBarTextPacket(component));
         }
     }
@@ -67,9 +73,15 @@ public final class TrueTimeAnnouncements
                 TrueTimeConfig.TITLE_STAY_TICKS.get(),
                 TrueTimeConfig.TITLE_FADE_OUT_TICKS.get()
         );
+        TrueTimeSavedData data = TrueTimeSavedData.get(server.overworld());
 
         for (ServerPlayer player : server.getPlayerList().getPlayers())
         {
+            if (data.hasSuppressedVisualAnnouncements(player.getUUID()))
+            {
+                continue;
+            }
+
             player.connection.send(timings);
             player.connection.send(new ClientboundSetTitleTextPacket(Component.literal(title)));
 

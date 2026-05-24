@@ -33,6 +33,11 @@ TrueTime provides operator commands for manually controlling the preserved day c
 /truetime settime <day> <timeOfDay>
 /truetime sync
 /truetime reload
+/truetime announcements status
+/truetime announcements hide
+/truetime announcements show
+/truetime announcements enable
+/truetime announcements disable
 ```
 
 - `/truetime info` shows the preserved day counter, raw Overworld game time, current time of day, and recent correction status.
@@ -42,6 +47,11 @@ TrueTime provides operator commands for manually controlling the preserved day c
 - `/truetime settime <day> <timeOfDay>` sets both the preserved day counter and the time of day in one command.
 - `/truetime sync` recalculates the preserved day counter from the current Overworld time, useful after world migration or configuration changes.
 - `/truetime reload` reloads the TrueTime server config, refreshes integrations, rewrites the placeholder export, and retries TAB placeholder registration.
+- `/truetime announcements status` shows whether your visual day-change announcements are enabled.
+- `/truetime announcements hide` hides title and action bar day-change announcements for you.
+- `/truetime announcements show` shows title and action bar day-change announcements for you again.
+- `/truetime announcements enable` enables global day-change announcements and saves the config.
+- `/truetime announcements disable` disables global day-change announcements and saves the config.
 
 Commands that would move the Overworld clock backwards require `allowBackwardTimeForOps` to be enabled.
 

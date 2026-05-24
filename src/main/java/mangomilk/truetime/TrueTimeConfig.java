@@ -140,6 +140,38 @@ public final class TrueTimeConfig
         }
     }
 
+    public static void setAnnouncementsEnabled(MinecraftServer server, boolean enabled)
+    {
+        ModConfig config = ModConfigs.getModConfigs(TrueTime.MOD_ID).stream()
+                .filter(modConfig -> modConfig.getType() == ModConfig.Type.SERVER)
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException("TrueTime server config is not registered."));
+
+        Path path = config.getFullPath();
+        if (path == null)
+        {
+            path = server.getServerDirectory().resolve("serverconfig").resolve(config.getFileName());
+        }
+
+        try
+        {
+            Files.createDirectories(path.getParent());
+        }
+        catch (IOException exception)
+        {
+            throw new IllegalStateException("Could not create config directory for " + path + ".", exception);
+        }
+
+        try (CommentedFileConfig fileConfig = CommentedFileConfig.of(path))
+        {
+            fileConfig.load();
+            fileConfig.set("announceDayChanges", enabled);
+            fileConfig.save();
+        }
+
+        reload(server);
+    }
+
     private static IConfigSpec.ILoadedConfig createLoadedConfig(CommentedConfig config, Path path, ModConfig modConfig)
     {
         try
